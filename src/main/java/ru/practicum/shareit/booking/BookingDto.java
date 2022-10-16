@@ -2,23 +2,20 @@ package ru.practicum.shareit.booking;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.status.Status;
-import ru.practicum.shareit.user.User;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
-public class Booking {
+public class BookingDto {
     private Integer id;
     private LocalDate start;
     private LocalDate end;
-    private Item item;
-    private User booker;
-    private Status status;
+    private Integer item;
+    private Integer booker;
+    private String status;
 
-    public Booking(Integer id, LocalDate start, LocalDate end, Item item, User booker, Status status) {
+    public BookingDto(Integer id, LocalDate start, LocalDate end, Integer item, Integer booker, String status) {
         this.id = id;
         this.start = start;
         this.end = end;
