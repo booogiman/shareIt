@@ -1,18 +1,9 @@
 package ru.practicum.shareit.user;
 
-import java.util.HashMap;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository {
+public interface UserRepository extends JpaRepository<User, Integer> {
 
-    UserDto add(User user);
+    Boolean existsUserById(Integer id);
 
-    UserDto update(User user);
-
-    UserDto getById(Integer id);
-
-    HashMap<Integer, UserDto> getAll();
-
-    UserDto patch(Integer userId, User user);
-
-    Boolean deleteById(Integer id);
 }

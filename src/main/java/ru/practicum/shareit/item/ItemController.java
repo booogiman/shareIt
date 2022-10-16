@@ -30,8 +30,9 @@ public class ItemController {
     }
 
     @GetMapping("{itemId}")
-    public ItemDto get(@PathVariable Integer itemId) {
-        return itemService.getById(itemId);
+    public ItemDto get(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                       @PathVariable Integer itemId) {
+        return itemService.getById(userId, itemId);
 
     }
 
@@ -44,4 +45,12 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam(required = true) String text) {
         return itemService.search(text);
     }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                 @PathVariable Integer itemId,
+                                 @RequestBody CommentDto comment) {
+        return itemService.addComment(userId, itemId, comment);
+    }
+
 }

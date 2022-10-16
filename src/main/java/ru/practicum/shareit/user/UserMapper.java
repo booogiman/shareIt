@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserMapper {
 
@@ -8,10 +9,10 @@ public class UserMapper {
         return new UserDto(user.getId(), user.getName(), user.getEmail());
     }
 
-    public static HashMap<Integer, UserDto> toUserDtoMap(HashMap<Integer, User> users) {
-        HashMap<Integer, UserDto> userDtos = new HashMap<>();
-        for (User user : users.values()) {
-            userDtos.put(user.getId(), toUserDto(user));
+    public static List<UserDto> toUserDtoList(List<User> users) {
+        List<UserDto> userDtos = new ArrayList<>();
+        for (User user : users) {
+            userDtos.add(toUserDto(user));
         }
         return userDtos;
     }
