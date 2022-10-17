@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.error.*;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Service
 public class BookingServiceImpl implements BookingService {
 
@@ -21,12 +23,12 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
 
-    @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository, UserRepository userRepository) {
-        this.bookingRepository = bookingRepository;
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-    }
+//    @Autowired
+//    public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository, UserRepository userRepository) {
+//        this.bookingRepository = bookingRepository;
+//        this.itemRepository = itemRepository;
+//        this.userRepository = userRepository;
+//    }
 
     @Override
     public ReturnedBookingDto add(Integer userId, ResultingBookingDto resultingBookingDto) {
@@ -102,31 +104,32 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<ReturnedBookingDto> getAllBookingsByOwnerId(Integer userId, String state) {
-        if (state.equals(State.ALL.toString())) {
+        State enumState = State.valueOf(state);
+        if (enumState == State.ALL) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdOrderByStartDesc(userId));
         }
-        if (state.equals(State.CURRENT.toString())) {
+        if (enumState == State.CURRENT) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
                             userId, LocalDateTime.now(), LocalDateTime.now()));
         }
-        if (state.equals(State.PAST.toString())) {
+        if (enumState == State.PAST) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
                             userId, LocalDateTime.now(), LocalDateTime.now()));
         }
-        if (state.equals(State.FUTURE.toString())) {
+        if (enumState == State.FUTURE) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
                             userId, LocalDateTime.now(), LocalDateTime.now()));
         }
-        if (state.equals(State.WAITING.toString())) {
+        if (enumState == State.WAITING) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
                             userId, Status.WAITING.toString()));
         }
-        if (state.equals(State.REJECTED.toString())) {
+        if (enumState == State.REJECTED) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
                             userId, Status.REJECTED.toString()));
@@ -136,26 +139,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<ReturnedBookingDto> getAllBookingsForAllItemsByOwnerId(Integer userId, String state) {
-        if (state.equals(State.ALL.toString())) {
+        State enumState = State.valueOf(state);
+        if (enumState == State.ALL) {
            return BookingMapper.toBookingDtoList(bookingRepository.findAllUsersBookings(userId));
         }
-        if (state.equals(State.CURRENT.toString())) {
+        if (enumState == State.CURRENT) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findAllCurrentUsersBookings(userId, LocalDateTime.now()));
         }
-        if (state.equals(State.PAST.toString())) {
+        if (enumState == State.PAST) {
             return BookingMapper.toBookingDtoList(bookingRepository.findAllPastUsersBookings(
                     userId, LocalDateTime.now(), LocalDateTime.now()));
         }
-        if (state.equals(State.FUTURE.toString())) {
+        if (enumState == State.FUTURE) {
             return BookingMapper.toBookingDtoList(bookingRepository.finnAllFutureUsersBookings(
                     userId, LocalDateTime.now(), LocalDateTime.now()));
         }
-        if (state.equals(State.WAITING.toString())) {
+        if (enumState == State.WAITING) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findAllUsersBookingsWithStatus(userId, Status.WAITING.toString()));
         }
-        if (state.equals(State.REJECTED.toString())) {
+        if (enumState == State.REJECTED) {
             return BookingMapper.toBookingDtoList(
                     bookingRepository.findAllUsersBookingsWithStatus(userId, Status.REJECTED.toString()));
         }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -21,21 +23,13 @@ public class ItemServiceImpl implements ItemService {
 
     private final BookingRepository bookingRepository;
 
-    @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
-                           CommentRepository commentRepository, BookingRepository bookingRepository) {
-        this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.commentRepository = commentRepository;
-        this.bookingRepository = bookingRepository;
-    }
 
     @Override
     public ItemDto add(Integer ownerId, ItemDto item) {
         if (ownerId == null) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
-        if (userRepository.findAll().isEmpty()) {
+        if (userRepository.count()==0) {
             throw new IdNotFoundException("Ни один пользователь не добавлен в систему");
         }
         if (item.getAvailable() == null) {
