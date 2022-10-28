@@ -12,7 +12,7 @@ public interface UserService {
 
     Collection<UserDto> getAll();
 
-    Boolean deleteById(Integer id);
+    void deleteById(Integer id);
 
     UserDto patch(Integer userId, UserDto user);
 }

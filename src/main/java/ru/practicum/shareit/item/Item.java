@@ -2,25 +2,37 @@ package ru.practicum.shareit.item;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.shareit.requests.ItemRequest;
-import ru.practicum.shareit.user.User;
+import lombok.ToString;
 
+import javax.persistence.*;
+
+@Table(name = "items")
+@Entity
 @Getter
 @Setter
+@ToString
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
     private String description;
     private Boolean available;
-    private User owner;
-    private ItemRequest request;
+    @Column(name = "owner_id", nullable = false)
+    private Integer ownerId;
+    @Column(name = "request_id")
+    private Integer requestId;
 
-    public Item(Integer id, String name, String description, Boolean available, User owner, ItemRequest request) {
+    public Item(Integer id, String name, String description, Boolean available, Integer ownerId, Integer requestId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
-        this.owner = owner;
-        this.request = request;
+        this.ownerId = ownerId;
+        this.requestId = requestId;
+    }
+
+    public Item() {
+
     }
 }
