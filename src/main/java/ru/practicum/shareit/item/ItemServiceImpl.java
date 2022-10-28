@@ -4,17 +4,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.error.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -39,16 +44,16 @@ public class ItemServiceImpl implements ItemService {
         if (ownerId == null) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
-        if (userRepository.findAll().isEmpty()) {
+        if (isEmpty(userRepository.findAll())) {
             throw new IdNotFoundException("Ни один пользователь не добавлен в систему");
         }
-        if (item.getAvailable() == null) {
+        if (isNull(item.getAvailable())) {
             throw new InvalidAvailableException("Не задан статус вещи");
         }
-        if (item.getName() == null || item.getName().isBlank()) {
+        if (isEmpty(item.getName())) {
             throw new InvalidNameException("Не задано имя вещи");
         }
-        if (item.getDescription() == null || item.getDescription().isBlank()) {
+        if (isEmpty(item.getDescription())) {
             throw new InvalidDescriptionException("Не задано описание вещи");
         }
         if (!userRepository.existsUserById(ownerId)) {
@@ -105,19 +110,19 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto patch(Integer userId, Integer itemId, ItemDto item) {
         Item foundedItem = itemRepository
                 .findById(itemId).orElseThrow(() -> new ItemNotFoundException("Вещь с id " + itemId + " не найдена"));
-        if (userId == null) {
+        if (isNull(userId)) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
         if (!foundedItem.getOwnerId().equals(userId)) {
             throw new InvalidUserException("Редактировать вещь может только ее владелец");
         }
-        if (item.getName() != null) {
+        if (!isNull(item.getName())) {
             foundedItem.setName(item.getName());
         }
-        if (item.getDescription() != null) {
+        if (!isNull(item.getDescription())) {
             foundedItem.setDescription(item.getDescription());
         }
-        if (item.getAvailable() != null) {
+        if (!isNull(item.getAvailable())) {
             foundedItem.setAvailable(item.getAvailable());
         }
         return ItemMapper.toItemDto(itemRepository.save(foundedItem));
