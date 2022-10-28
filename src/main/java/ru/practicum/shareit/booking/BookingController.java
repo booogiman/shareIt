@@ -38,14 +38,18 @@ public class BookingController {
     @GetMapping
     public Collection<ReturnedBookingDto> getAllBookingsByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state) {
-        return bookingService.getAllBookingsByOwnerId(userId, state);
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(defaultValue = "0", required = false) Integer from,
+            @RequestParam(defaultValue = "10", required = false) Integer page) {
+        return bookingService.getAllBookingsByOwnerId(userId, state, from, page);
     }
 
     @GetMapping("/owner")
     public Collection<ReturnedBookingDto> getAllBookingsForAllItemsById(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state) {
-        return bookingService.getAllBookingsForAllItemsByOwnerId(userId, state);
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(defaultValue = "0", required = false) Integer from,
+            @RequestParam(defaultValue = "10", required = false) Integer page) {
+        return bookingService.getAllBookingsForAllItemsByOwnerId(userId, state, from, page);
     }
 }

@@ -4,13 +4,12 @@ import java.util.Collection;
 
 public interface RequestService {
 
-    ItemRequestDto add(ItemRequestDto itemRequest);
+    ItemRequestDto add(Integer userId, ItemRequestDto itemRequest);
 
-    ItemRequestDto update(ItemRequestDto itemRequest);
+    ItemRequestDto getById(Integer userId, Integer requestId);
 
-    ItemRequestDto getById(Integer id);
+    Collection<ItemRequestDto> getAllUsersRequests(Integer userId);
 
-    Collection<ItemRequestDto> getAll();
+    Collection<ItemRequestDto> getAllRequests(Integer userId, Integer from, Integer size);
 
-    Boolean deleteById(Integer id);
 }

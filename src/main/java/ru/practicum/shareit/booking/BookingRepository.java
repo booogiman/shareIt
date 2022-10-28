@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -8,45 +10,45 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-    List<Booking> findByBookerIdOrderByStartDesc(Integer bookerId);
+    Page<Booking> findByBookerIdOrderByStartDesc(Integer bookerId, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo);
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
-            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo);
+    Page<Booking> findByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
-            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo);
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
+            Integer bookerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStatusContainsOrderByStartDesc(Integer bookerId, String status);
+    Page<Booking> findByBookerIdAndStatusContainsOrderByStartDesc(Integer bookerId, String status, Pageable pageable);
 
     Boolean existsByBookerIdAndItemIdAndEndIsAfter(Integer bookerId, Integer itemId, LocalDateTime end);
 
-    @Query("from Booking b Inner Join Item i on b.item.id = i.id " +
+    @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
             "Where i.ownerId = ?1 " +
             "order by b.start desc")
-    List<Booking> findAllUsersBookings(Integer ownerId);
+    Page<Booking> findAllUsersBookings(Integer ownerId, Pageable pageable);
 
-    @Query("from Booking b " +
-            "Where b.item.ownerId = ?1 and ?2 between b.start and b.end " +
+    @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
+            "Where i.ownerId = ?1 and ?2 between b.start and b.end " +
             "order by b.start desc")
-    List<Booking> findAllCurrentUsersBookings(Integer ownerId, LocalDateTime date);
+    Page<Booking> findAllCurrentUsersBookings(Integer ownerId, LocalDateTime date, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
             "Where i.ownerId = ?1 and ?2 >= b.end and ?3 >= b.start " +
             "order by b.start desc")
-    List<Booking> findAllPastUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo);
+    Page<Booking> findAllPastUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
             "Where i.ownerId = ?1 and ?2 <= b.end and ?3 <= b.start " +
             "order by b.start desc")
-    List<Booking> finnAllFutureUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo);
+    Page<Booking> finnAllFutureUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
             "Where i.ownerId = ?1 and b.status like ?2 " +
             "order by b.start desc")
-    List<Booking> findAllUsersBookingsWithStatus(Integer ownerId, String query);
+    Page<Booking> findAllUsersBookingsWithStatus(Integer ownerId, String query, Pageable pageable);
 
     @Query(value = "select * from bookings b inner join items i on i.id = b.item_id "
             + "Where b.item_id = ?1 and b.end_date_time < now() and b.status = 'APPROVED' and i.owner_id = ?2 "

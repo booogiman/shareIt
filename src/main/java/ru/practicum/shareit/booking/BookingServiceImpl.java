@@ -1,7 +1,8 @@
 package ru.practicum.shareit.booking;
 
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.error.*;
 import ru.practicum.shareit.item.Item;
@@ -10,25 +11,24 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Data
 @Service
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
-
     private final UserRepository userRepository;
 
 
-//    @Autowired
-//    public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository, UserRepository userRepository) {
-//        this.bookingRepository = bookingRepository;
-//        this.itemRepository = itemRepository;
-//        this.userRepository = userRepository;
-//    }
+    @Autowired
+    public BookingServiceImpl(BookingRepository bookingRepository, ItemRepository itemRepository,
+                              UserRepository userRepository) {
+        this.bookingRepository = bookingRepository;
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public ReturnedBookingDto add(Integer userId, ResultingBookingDto resultingBookingDto) {
@@ -103,66 +103,104 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<ReturnedBookingDto> getAllBookingsByOwnerId(Integer userId, String state) {
-        State enumState = State.valueOf(state);
-        if (enumState == State.ALL) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdOrderByStartDesc(userId));
+    public List<ReturnedBookingDto> getAllBookingsByOwnerId(Integer userId, String state, Integer from, Integer page) {
+        if (!userRepository.existsUserById(userId)) {
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
         }
-        if (enumState == State.CURRENT) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                            userId, LocalDateTime.now(), LocalDateTime.now()));
+        PageRequest pageRequest = PageRequest.of(from, page);
+        if (state.equals(State.ALL.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdOrderByStartDesc(userId, pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.PAST) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
-                            userId, LocalDateTime.now(), LocalDateTime.now()));
+        if (state.equals(State.CURRENT.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                    userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.FUTURE) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
-                            userId, LocalDateTime.now(), LocalDateTime.now()));
+        if (state.equals(State.PAST.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsBeforeOrderByStartDesc(
+                    userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.WAITING) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
-                            userId, Status.WAITING.toString()));
+        if (state.equals(State.FUTURE.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdAndStartIsAfterAndEndIsAfterOrderByStartDesc(
+                    userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.REJECTED) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
-                            userId, Status.REJECTED.toString()));
+        if (state.equals(State.WAITING.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
+                    userId, Status.WAITING.toString(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        return new ArrayList<>();
+        if (state.equals(State.REJECTED.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findByBookerIdAndStatusContainsOrderByStartDesc(
+                    userId, Status.REJECTED.toString(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
+        }
+        throw new InvalidStateException("Unknown state: " + state);
     }
 
     @Override
-    public List<ReturnedBookingDto> getAllBookingsForAllItemsByOwnerId(Integer userId, String state) {
-        State enumState = State.valueOf(state);
-        if (enumState == State.ALL) {
-           return BookingMapper.toBookingDtoList(bookingRepository.findAllUsersBookings(userId));
+    public List<ReturnedBookingDto> getAllBookingsForAllItemsByOwnerId(
+            Integer userId, String state, Integer from, Integer page) {
+        if (!userRepository.existsUserById(userId)) {
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
         }
-        if (enumState == State.CURRENT) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findAllCurrentUsersBookings(userId, LocalDateTime.now()));
+        PageRequest pageRequest = PageRequest.of(from, page);
+        if (state.equals(State.ALL.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findAllUsersBookings(userId, pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.PAST) {
-            return BookingMapper.toBookingDtoList(bookingRepository.findAllPastUsersBookings(
-                    userId, LocalDateTime.now(), LocalDateTime.now()));
+        if (state.equals(State.CURRENT.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findAllCurrentUsersBookings(
+                    userId, LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.FUTURE) {
-            return BookingMapper.toBookingDtoList(bookingRepository.finnAllFutureUsersBookings(
-                    userId, LocalDateTime.now(), LocalDateTime.now()));
+        if (state.equals(State.PAST.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findAllPastUsersBookings(
+                    userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.WAITING) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findAllUsersBookingsWithStatus(userId, Status.WAITING.toString()));
+        if (state.equals(State.FUTURE.toString())) {
+            Page<Booking> bookingPage = bookingRepository.finnAllFutureUsersBookings(
+                    userId, LocalDateTime.now(), LocalDateTime.now(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        if (enumState == State.REJECTED) {
-            return BookingMapper.toBookingDtoList(
-                    bookingRepository.findAllUsersBookingsWithStatus(userId, Status.REJECTED.toString()));
+        if (state.equals(State.WAITING.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findAllUsersBookingsWithStatus(
+                    userId, Status.WAITING.toString(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
         }
-        return new ArrayList<>();
+        if (state.equals(State.REJECTED.toString())) {
+            Page<Booking> bookingPage = bookingRepository.findAllUsersBookingsWithStatus(
+                    userId, Status.REJECTED.toString(), pageRequest);
+            return bookingPage.stream()
+                    .map(BookingMapper::toReturnedBookingDto)
+                    .collect(Collectors.toList());
+
+        }
+        throw new InvalidStateException("Unknown state: " + state);
     }
 }

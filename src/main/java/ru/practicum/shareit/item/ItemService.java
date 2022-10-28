@@ -2,7 +2,7 @@ package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collection;
 
 @Service
 public interface ItemService {
@@ -11,11 +11,11 @@ public interface ItemService {
 
     ItemDto getById(Integer userId, Integer itemId);
 
-    List<ItemDto> getAll(Integer userId);
+    Collection<ItemDto> getAll(Integer userId, Integer from, Integer page);
 
     ItemDto patch(Integer userId, Integer id, ItemDto item);
 
-    List<ItemDto> search(String query);
+    Collection<ItemDto> search(String query, Integer from, Integer size);
 
     CommentDto addComment(Integer userId, Integer itemId, CommentDto comment);
 

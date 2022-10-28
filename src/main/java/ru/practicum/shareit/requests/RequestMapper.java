@@ -1,20 +1,21 @@
 package ru.practicum.shareit.requests;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestMapper {
     public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         return new ItemRequestDto(itemRequest.getId(), itemRequest.getDescription(),
-                itemRequest.getRequestor() != null ? itemRequest.getRequestor().getId() : null,
-                itemRequest.getCreated());
+                itemRequest.getRequester() != null ? itemRequest.getRequester().getId() : null,
+                itemRequest.getCreated(), null);
     }
 
-    public static HashMap<Integer, ItemRequestDto> toItemRequestMap(HashMap<Integer, ItemRequest> itemRequests) {
-        HashMap<Integer, ItemRequestDto> itemRequestDtoMap = new HashMap<>();
-        for (ItemRequest itemRequest : itemRequests.values()) {
-            itemRequestDtoMap.put(itemRequest.getId(), toItemRequestDto(itemRequest));
+    public static List<ItemRequestDto> toItemRequestDtoList(List<ItemRequest> itemRequests) {
+        List<ItemRequestDto> itemRequestDtoList = new ArrayList<>();
+        for (ItemRequest itemRequest : itemRequests) {
+            itemRequestDtoList.add(toItemRequestDto(itemRequest));
         }
-        return itemRequestDtoMap;
+        return itemRequestDtoList;
     }
 
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {

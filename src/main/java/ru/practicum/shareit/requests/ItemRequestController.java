@@ -17,27 +17,26 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestDto add(@RequestBody ItemRequestDto itemRequest) {
-        return requestService.add(itemRequest);
-    }
-
-    @PutMapping
-    public ItemRequestDto update(@RequestBody ItemRequestDto itemRequest) {
-        return requestService.update(itemRequest);
-    }
-
-    @GetMapping("/{id}")
-    public ItemRequestDto get(@PathVariable Integer id) {
-        return requestService.getById(id);
+    public ItemRequestDto add(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                              @RequestBody ItemRequestDto itemRequest) {
+        return requestService.add(userId, itemRequest);
     }
 
     @GetMapping
-    public Collection<ItemRequestDto> getAll() {
-        return requestService.getAll();
+    public Collection<ItemRequestDto> getAllUsersRequests(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+        return requestService.getAllUsersRequests(userId);
     }
 
-    @DeleteMapping("/{id}")
-    public Boolean delete(@PathVariable Integer id) {
-        return requestService.deleteById(id);
+    @GetMapping("/all")
+    public Collection<ItemRequestDto> getAllRequests(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                                     @RequestParam(required = false) Integer from,
+                                                     @RequestParam(required = false) Integer size) {
+        return requestService.getAllRequests(userId, from, size);
+    }
+
+    @GetMapping("{requestId}")
+    public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                         @PathVariable Integer requestId) {
+        return requestService.getById(userId, requestId);
     }
 }

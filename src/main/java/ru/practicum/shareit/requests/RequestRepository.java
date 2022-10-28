@@ -1,17 +1,14 @@
 package ru.practicum.shareit.requests;
 
-import java.util.HashMap;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RequestRepository {
+import java.util.List;
 
-    ItemRequestDto add(ItemRequest itemRequest);
+public interface RequestRepository extends JpaRepository<ItemRequest, Integer> {
 
-    ItemRequestDto update(ItemRequest itemRequest);
+    List<ItemRequest> getAllByRequesterIdOrderByCreated(Integer requesterId);
 
-    ItemRequestDto getById(Integer id);
-
-    HashMap<Integer, ItemRequestDto> getAll();
-
-    Boolean deleteById(Integer id);
-
+    Page<ItemRequest> findByIdIsNot(Integer requesterId, Pageable pageable);
 }
