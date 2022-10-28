@@ -26,28 +26,23 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Boolean existsByBookerIdAndItemIdAndEndIsAfter(Integer bookerId, Integer itemId, LocalDateTime end);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
-            "Where i.ownerId = ?1 " +
-            "order by b.start desc")
+            "Where i.ownerId = ?1 ")
     Page<Booking> findAllUsersBookings(Integer ownerId, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
-            "Where i.ownerId = ?1 and ?2 between b.start and b.end " +
-            "order by b.start desc")
+            "Where i.ownerId = ?1 and ?2 between b.start and b.end ")
     Page<Booking> findAllCurrentUsersBookings(Integer ownerId, LocalDateTime date, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
-            "Where i.ownerId = ?1 and ?2 >= b.end and ?3 >= b.start " +
-            "order by b.start desc")
+            "Where i.ownerId = ?1 and ?2 >= b.end and ?3 >= b.start ")
     Page<Booking> findAllPastUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
-            "Where i.ownerId = ?1 and ?2 <= b.end and ?3 <= b.start " +
-            "order by b.start desc")
-    Page<Booking> finnAllFutureUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
+            "Where i.ownerId = ?1 and ?2 <= b.end and ?3 <= b.start ")
+    Page<Booking> findAllFutureUsersBookings(Integer ownerId, LocalDateTime dateOne, LocalDateTime dateTwo, Pageable pageable);
 
     @Query("select b from Booking b Inner Join Item i on b.item.id = i.id " +
-            "Where i.ownerId = ?1 and b.status like ?2 " +
-            "order by b.start desc")
+            "Where i.ownerId = ?1 and b.status like ?2 ")
     Page<Booking> findAllUsersBookingsWithStatus(Integer ownerId, String query, Pageable pageable);
 
     @Query(value = "select * from bookings b inner join items i on i.id = b.item_id "
