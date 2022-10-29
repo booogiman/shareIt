@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/items")
@@ -37,13 +36,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Integer userId) {
-        return itemService.getAll(userId);
+    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                      @RequestParam(defaultValue = "0", required = false) Integer from,
+                                      @RequestParam(defaultValue = "10", required = false) Integer page) {
+        return itemService.getAll(userId, from, page);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam(required = true) String text) {
-        return itemService.search(text);
+    public Collection<ItemDto> search(@RequestParam(required = true) String text,
+                                @RequestParam(defaultValue = "0", required = false) Integer from,
+                                @RequestParam(defaultValue = "10", required = false) Integer page) {
+        return itemService.search(text, from, page);
     }
 
     @PostMapping("{itemId}/comment")

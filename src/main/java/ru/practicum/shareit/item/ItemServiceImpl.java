@@ -1,19 +1,26 @@
 package ru.practicum.shareit.item;
 
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.error.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Data
+import static java.util.Objects.isNull;
+import static org.springframework.util.StringUtils.isEmpty;
+
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -23,22 +30,30 @@ public class ItemServiceImpl implements ItemService {
 
     private final BookingRepository bookingRepository;
 
+    @Autowired
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
+                           CommentRepository commentRepository, BookingRepository bookingRepository) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
+        this.bookingRepository = bookingRepository;
+    }
 
     @Override
     public ItemDto add(Integer ownerId, ItemDto item) {
         if (ownerId == null) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
-        if (userRepository.count()==0) {
+        if (userRepository.existsBy()) {
             throw new IdNotFoundException("Ни один пользователь не добавлен в систему");
         }
-        if (item.getAvailable() == null) {
+        if (isNull(item.getAvailable())) {
             throw new InvalidAvailableException("Не задан статус вещи");
         }
-        if (item.getName() == null || item.getName().isBlank()) {
+        if (isEmpty(item.getName())) {
             throw new InvalidNameException("Не задано имя вещи");
         }
-        if (item.getDescription() == null || item.getDescription().isBlank()) {
+        if (isEmpty(item.getDescription())) {
             throw new InvalidDescriptionException("Не задано описание вещи");
         }
         if (!userRepository.existsUserById(ownerId)) {
@@ -59,7 +74,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException("Вещь с id " + itemId + " не найдена"));
         ItemDto itemDto = ItemMapper.toItemDto(item);
-        if ((bookingRepository.findLastBooking(itemId, userId)) != null && (bookingRepository.findNextBooking(itemId, userId) != null)) {
+        if ((bookingRepository.findLastBooking(itemId, userId)) != null && (
+                bookingRepository.findNextBooking(itemId, userId) != null)) {
             itemDto.setLastBooking(BookingMapper.toItemBookingDto(bookingRepository.findLastBooking(itemId, userId)));
             itemDto.setNextBooking(BookingMapper.toItemBookingDto(bookingRepository.findNextBooking(itemId, userId)));
         }
@@ -68,16 +84,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAll(Integer userId) {
+    public Collection<ItemDto> getAll(Integer userId, Integer from, Integer size) {
         if (!userRepository.existsUserById(userId)) {
             throw new InvalidUserException("Пользователь не добавлен в систему");
         }
-        List<ItemDto> itemDtos = ItemMapper.toItemDtoList(itemRepository.getAllByOwnerId(userId));
+        PageRequest pageRequest = PageRequest.of(from, size);
+        Page<Item> itemPage = itemRepository.getAllByOwnerIdOrderById(userId, pageRequest);
+        List<ItemDto> itemDtos = itemPage.stream()
+                .map(i -> ItemMapper.toItemDto(i))
+                .collect(Collectors.toList());
         for (ItemDto itemDto : itemDtos) {
             if ((bookingRepository.findLastBooking(itemDto.getId(), userId)) != null
                     && (bookingRepository.findNextBooking(itemDto.getId(), userId) != null)) {
-                itemDto.setLastBooking(BookingMapper.toItemBookingDto(bookingRepository.findLastBooking(itemDto.getId(), userId)));
-                itemDto.setNextBooking(BookingMapper.toItemBookingDto(bookingRepository.findNextBooking(itemDto.getId(), userId)));
+                itemDto.setLastBooking(BookingMapper.toItemBookingDto(
+                        bookingRepository.findLastBooking(itemDto.getId(), userId)));
+                itemDto.setNextBooking(BookingMapper.toItemBookingDto(
+                        bookingRepository.findNextBooking(itemDto.getId(), userId)));
                 itemDto.setComments(CommentMapper.toCommentDtoList(commentRepository.findAllByItemId(itemDto.getId())));
             }
         }
@@ -85,34 +107,37 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto patch(Integer userId, Integer id, ItemDto item) {
+    public ItemDto patch(Integer userId, Integer itemId, ItemDto item) {
         Item foundedItem = itemRepository
-                .findById(id).orElseThrow(() -> new ItemNotFoundException("Вещь с id " + id + " не найдена"));
-        if (userId == null) {
+                .findById(itemId).orElseThrow(() -> new ItemNotFoundException("Вещь с id " + itemId + " не найдена"));
+        if (isNull(userId)) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
         if (!foundedItem.getOwnerId().equals(userId)) {
             throw new InvalidUserException("Редактировать вещь может только ее владелец");
         }
-        if (item.getName() != null) {
+        if (!isNull(item.getName())) {
             foundedItem.setName(item.getName());
         }
-        if (item.getDescription() != null) {
+        if (!isNull(item.getDescription())) {
             foundedItem.setDescription(item.getDescription());
         }
-        if (item.getAvailable() != null) {
+        if (!isNull(item.getAvailable())) {
             foundedItem.setAvailable(item.getAvailable());
         }
         return ItemMapper.toItemDto(itemRepository.save(foundedItem));
     }
 
     @Override
-    public List<ItemDto> search(String query) {
+    public Collection<ItemDto> search(String query, Integer from, Integer size) {
         List<Item> items = new ArrayList<>();
         if (query.isBlank()) {
             return new ArrayList<>();
         }
-        List<Item> foundedItems = itemRepository.search(query);
+        PageRequest pageRequest = PageRequest.of(from, size);
+        Page<Item> itemPage = itemRepository.search(query, pageRequest);
+        List<Item> foundedItems = itemPage.stream()
+                .collect(Collectors.toList());
         for (Item item : foundedItems) {
             if (item.getAvailable()) {
                 items.add(item);

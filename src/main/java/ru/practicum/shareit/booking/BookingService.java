@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface BookingService {
 
@@ -10,8 +10,8 @@ public interface BookingService {
 
     ReturnedBookingDto getById(Integer userId, Integer bookingId);
 
-    List<ReturnedBookingDto> getAllBookingsByOwnerId(Integer userId, String state);
+    Collection<ReturnedBookingDto> getAllBookingsByOwnerId(Integer userId, String state, Integer from, Integer page);
 
-    List<ReturnedBookingDto> getAllBookingsForAllItemsByOwnerId(Integer userId, String state);
+    Collection<ReturnedBookingDto> getAllBookingsForAllItemsByOwnerId(Integer userId, String state, Integer from, Integer page);
 
 }

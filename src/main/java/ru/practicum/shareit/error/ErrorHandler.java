@@ -92,11 +92,11 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
         return new ErrorResponse(
-            e.getMessage()
+                e.getMessage()
         );
     }
 
-    @ExceptionHandler // TODO Возможно неправильно
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleInvalidAccessException(final InvalidAccessException e) {
         return new ErrorResponse(
@@ -104,7 +104,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler // TODO Возможно неправильно
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidStatusException(final InvalidStatusException e) {
         return new ErrorResponse(
@@ -127,4 +127,45 @@ public class ErrorHandler {
                 e.getMessage()
         );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInvalidStateException(final InvalidStateException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemRequestNotFoundException(final ItemRequestNotFoundException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInvalidUserIdException(final InvalidUserIdException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidItemRequestException(final InvalidItemRequestException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInvalidItemRequestSizeException(final InvalidItemRequestParamException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
 }
