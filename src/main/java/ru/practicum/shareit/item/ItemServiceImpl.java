@@ -44,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
         if (ownerId == null) {
             throw new InvalidIdException("Ошибка id пользователя");
         }
-        if (isEmpty(userRepository.findAll())) {
+        if (userRepository.existsBy()) {
             throw new IdNotFoundException("Ни один пользователь не добавлен в систему");
         }
         if (isNull(item.getAvailable())) {
