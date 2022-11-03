@@ -34,7 +34,7 @@ public class BookingServiceIntegralTest {
 
     ItemDto itemDto = new ItemDto(1, "Отвертка", "Хорошая отвертка", true, null,
             null, null, null);
-    LocalDateTime date = LocalDateTime.of(2022, 8, 20, 13, 12);
+    LocalDateTime date = LocalDateTime.now().plusMinutes(5);
     ResultingBookingDto resultingBookingDto = new ResultingBookingDto(
             1, date, date.plusDays(1),
             1, null, null);

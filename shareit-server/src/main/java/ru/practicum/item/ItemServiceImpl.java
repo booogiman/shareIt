@@ -16,6 +16,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -36,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto add(Integer ownerId, ItemDto item) {
-        if (userRepository.findAll().isEmpty()) {
+        if (userRepository.existsBy()) {
             throw new IdNotFoundException("Ни один пользователь не добавлен в систему");
         }
         if (!userRepository.existsUserById(ownerId)) {
@@ -96,13 +98,13 @@ public class ItemServiceImpl implements ItemService {
         if (!foundedItem.getOwnerId().equals(userId)) {
             throw new InvalidUserException("Редактировать вещь может только ее владелец");
         }
-        if (item.getName() != null) {
+        if (!isNull(item.getName())) {
             foundedItem.setName(item.getName());
         }
-        if (item.getDescription() != null) {
+        if (!isNull(item.getDescription())) {
             foundedItem.setDescription(item.getDescription());
         }
-        if (item.getAvailable() != null) {
+        if (!isNull(item.getAvailable())) {
             foundedItem.setAvailable(item.getAvailable());
         }
         return ItemMapper.toItemDto(itemRepository.save(foundedItem));
