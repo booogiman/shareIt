@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13.7-alpine
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pas
+  shareit-gateway:
+    build: shareit-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - shareit-server
+    environment:
+      - SHAREIT_SERVER_URL=http://shareIt-server:9090
+  shareit-server:
+    build: shareit-server
+    ports:
+      - "9090:9090"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pas
+
+
+
